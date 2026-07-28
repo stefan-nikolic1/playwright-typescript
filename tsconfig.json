@@ -2,11 +2,11 @@
   "compileOnSave": false,
   "compilerOptions": {
     "importHelpers": true,
-    "module": "node16",
+    "module": "nodenext",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node16",
+    "moduleResolution": "nodenext",
     "experimentalDecorators": true,
     "target": "es2020",
     "typeRoots": [
