@@ -1,21 +1,29 @@
 import {test, expect} from '@playwright/test'
 
+test.describe.configure({mode: 'parallel'})
+
 test.beforeEach(async({page}) => {
-    await page.goto('http://localhost:4200/')
+    await page.goto('/')
 })
 
 test.describe('Form Layouts page', () => {
+    test.describe.configure({retries: 2})
+    test.describe.configure({mode: 'serial'})
+
     test.beforeEach( async({page}) => {
         await page.getByText('Forms').click()  
         await page.getByText('Form Layouts').click()
     })
 
-    test('input fields', async({page}) => {
+    test('input fields', async({page}, testInfo) => {
+        if(testInfo.retry){
+            //do something
+        }
     const usingTheGridEmailInput = page.locator('nb-card', {hasText: "Using the Grid"}).getByRole('textbox', {name: "Email"})
 
     await usingTheGridEmailInput.fill('test@test.com')
     await usingTheGridEmailInput.clear()
-    await usingTheGridEmailInput.pressSequentially('test2@test.com', {delay: 500})
+    await usingTheGridEmailInput.type('test2@test.com')
 
     //generic assertion
     const inputValue = await usingTheGridEmailInput.inputValue()
