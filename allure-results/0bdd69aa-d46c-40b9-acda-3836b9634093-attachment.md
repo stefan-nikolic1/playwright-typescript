@@ -1,0 +1,129 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: tests/firstTest.spec.ts >> extracting values
+- Location: tests/firstTest.spec.ts:87:5
+
+# Error details
+
+```
+TimeoutError: page.goto: Timeout 5000ms exceeded.
+Call log:
+  - navigating to "http://localhost:4200/", waiting until "load"
+
+```
+
+# Test source
+
+```ts
+  1   | import {test, expect} from '@playwright/test'
+  2   | 
+  3   | test.beforeEach(async({page}) => {
+> 4   |     await page.goto('/')
+      |                ^ TimeoutError: page.goto: Timeout 5000ms exceeded.
+  5   |     await page.getByText('Forms').click()  
+  6   |     await page.getByText('Form Layouts').click()
+  7   | })
+  8   | 
+  9   | test('locator syntax rules', async({page}) => {
+  10  |     //by Tag name
+  11  |     await page.locator('input').first().click()
+  12  | 
+  13  |     //by ID
+  14  |     page.locator('#inputEmail')
+  15  | 
+  16  |     //by Class value
+  17  |     page.locator('.shape-rectangle')
+  18  | 
+  19  |     //by atribute
+  20  |     page.locator('[placeholder="Email"]')
+  21  | 
+  22  |     //by Class value (full)
+  23  |     page.locator('[class="input-width size-medium status-basic shape-rectangle nb-transition"]')
+  24  | 
+  25  |     //combine different selectors
+  26  |     page.locator('input[placeholder="Email"][nbinput]')
+  27  | 
+  28  |     //by XPATH (NOT RECOMMENDED)
+  29  |     page.locator('//*[@id="inputEmail1"]')
+  30  | 
+  31  |     //by partial text
+  32  |     page.locator(':text("Using")')
+  33  | 
+  34  |     //by exact text match
+  35  |     page.locator('"text-is("Using the Grid")')
+  36  | })
+  37  | 
+  38  | test('User facing locators', async({page}) => {
+  39  |     // await page.getByRole('textbox', {name: "Email"}).first().click()
+  40  |     // await page.getByRole('button', {name: "Sign in"}).first().click()
+  41  | 
+  42  |     await page.getByLabel('Email').first().click()
+  43  | 
+  44  |     await page.getByPlaceholder('Jane Doe').click()
+  45  | 
+  46  |     await page.getByText('Using the Grid').click()
+  47  | 
+  48  |     // await page.getByTestId('SignIn').click()
+  49  | 
+  50  |     await page.getByTitle('IoT Dashboard').click()
+  51  | })
+  52  | 
+  53  | test('locating child elements', async({page}) => {
+  54  |     await page.locator('nb-card nb-radio :text-is("Option 1")').click()
+  55  |     await page.locator('nb-card').locator('nb-radio').locator(':text-is("Option 2")').click()
+  56  | 
+  57  |     await page.locator('nb-card').getByRole('button', {name: "Sign in"}).first().click()
+  58  | 
+  59  |     await page.locator('nb-card').nth(3).getByRole('button').click()
+  60  | })
+  61  | 
+  62  | test('locating parent elements', async({page}) => {
+  63  |     await page.locator('nb-card', {hasText: "Using the Grid"}).getByRole('textbox', {name: "Email"}).click()
+  64  |     await page.locator('nb-card', {has: page.locator('#inputEmail1')}).getByRole('textbox', {name: "Email"}).click()
+  65  | 
+  66  |     await page.locator('nb-card').filter({hasText: "Basic form"}).getByRole('textbox', {name: "Email"}).click()
+  67  |     await page.locator('nb-card').filter({has: page.locator('.status-danger')}).getByRole('textbox', {name: "Password"}).click()
+  68  | 
+  69  |     await page.locator('nb-card').filter({has: page.locator('nb-checkbox')}).filter({hasText: "Sign in"})
+  70  |         .getByRole('textbox', {name: "Email"}).click()
+  71  | 
+  72  |     await page.locator(':text-is("Using the Grid")').locator('..').getByRole('textbox', {name: "Email"}).click()
+  73  | })
+  74  | 
+  75  | test('Reusing the locators', async({page}) => {
+  76  |     const basicForm = page.locator('nb-card').filter({hasText: "Basic form"})
+  77  |     const emailField = basicForm.getByRole('textbox', {name: "Email"})
+  78  | 
+  79  |     await emailField.fill('test@test.com')
+  80  |     await basicForm.getByRole('textbox', {name: "Password"}).fill('Welcome123')
+  81  |     await basicForm.locator('nb-checkbox').click()
+  82  |     await basicForm.getByRole('button').click()
+  83  | 
+  84  |     await expect(emailField).toHaveValue('test@test.com')
+  85  | })
+  86  | 
+  87  | test('extracting values', async({page}) => {
+  88  |     //single test value
+  89  |     const basicForm = page.locator('nb-card').filter({hasText: "Basic form"})
+  90  |     const buttonText = await basicForm.locator('button').textContent()
+  91  |     expect(buttonText).toEqual('Submit')
+  92  | 
+  93  |     //all text values
+  94  |     const allRadioButtonsLabels = await page.locator('nb-radio').allTextContents()
+  95  |     expect(allRadioButtonsLabels).toContain("Option 1")
+  96  | 
+  97  |     //input value
+  98  |     const emailField = basicForm.getByRole('textbox', {name: "Email"})
+  99  |     await emailField.fill('test@test.com')
+  100 |     const emailValue = await emailField.inputValue()
+  101 |     expect(emailValue).toEqual('test@test.com')
+  102 | 
+  103 |     const placeholderValue = await emailField.getAttribute('placeholder')
+  104 |     expect(placeholderValue).toEqual('Email')
+```

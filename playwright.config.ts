@@ -8,9 +8,10 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 export default defineConfig({
   // timeout: 10000,
   // globalTimeout: 60000,
-  // expect:{
-  //   timeout: 2000
-  // },
+  expect:{
+    timeout: 2000,
+    toMatchSnapshot: {maxDiffPixels: 50}
+  },
 
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
@@ -19,8 +20,11 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  reporter: [
+    ['json', {outputFile: 'test-results/jsonReport.json'}],
+    ['junit', {outputFile: 'test-results/junitReport.xml'}],
+    ['allure-playwright']
+  ],
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: 'http://localhost:4200/',
@@ -30,7 +34,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     // actionTimeout: 5000,
     // navigationTimeout: 5000
-    navigationTimeout: 5000,
+    // navigationTimeout: 30000,
     video: {
       mode: 'off',
       size: { width: 1920, height: 1080 }
@@ -66,6 +70,13 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
+    {
+      name: 'mobile',
+      testMatch: 'testMobile.spec.ts',
+      use: {
+        ...devices['iPhone 13 Pro']
+      }
+    }
 
     /* Test against mobile viewports. */
     // {
